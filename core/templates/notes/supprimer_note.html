@@ -1,0 +1,7 @@
+<h2>Supprimer cette note ?</h2>
+<p>{{ note.eleve }} - {{ note.matiere }} : {{ note.note }}</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">🗑️ Supprimer</button>
+    <a href="{% url 'dashboard_enseignant' %}">Annuler</a>
+</form>

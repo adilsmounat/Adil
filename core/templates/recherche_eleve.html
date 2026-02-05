@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Recherche Élève</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+
+    <h2 class="mb-4">🔍 Recherche d’un élève</h2>
+
+    <form method="get" class="mb-4">
+        <input type="text" name="q" placeholder="Nom de l’élève" class="form-control w-50 d-inline">
+        <button type="submit" class="btn btn-primary">Chercher</button>
+    </form>
+
+    {% if eleve %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">👤 Informations de l’élève</div>
+        <div class="card-body">
+            <p><strong>Nom :</strong> {{ eleve.nom }}</p>
+            <p><strong>Prénom :</strong> {{ eleve.prenom }}</p>
+            <p><strong>Date de naissance :</strong> {{ eleve.naissance }}</p>
+            <p><strong>Classe :</strong> {{ eleve.classe }}</p>
+            <p><strong>Parent :</strong> {{ eleve.parent_user.username|default:"-" }}</p>
+            <p><strong>Enseignants :</strong>
+                {% if eleve.enseignants.all %}
+                    {% for enseignant in eleve.enseignants.all %}
+                        {{ enseignant.user.username }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <h4>📝 Notes</h4>
+    <ul>
+        {% for note in notes %}
+            <li>{{ note.matiere }} : {{ note.valeur }} ({{ note.date }})</li>
+        {% empty %}
+            <li>Aucune note enregistrée.</li>
+        {% endfor %}
+    </ul>
+
+    <h4>📅 Absences</h4>
+    <ul>
+        {% for absence in absences %}
+            <li>{{ absence.date }} : {{ absence.justification }}</li>
+        {% empty %}
+            <li>Aucune absence.</li>
+        {% endfor %}
+    </ul>
+
+    <h4>🚌 Transport</h4>
+    <ul>
+        {% for t in transports %}
+            <li>{{ t.date }} - {{ t.trajet }} ({{ t.distance }} km)</li>
+        {% empty %}
+            <li>Aucun transport.</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+</body>
+</html>

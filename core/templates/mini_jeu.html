@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5 text-center">
+  <h2 class="mb-4">🎯 Mini-jeu éducatif : Trouve le mot caché</h2>
+  {% if badge_gagne %}
+<div id="badge-popup" class="alert alert-success text-center">
+    🏆 Félicitations ! Tu as gagné un nouveau badge : <strong>Chasseur de mots</strong> !
+</div>
+{% endif %}
+
+
+  
+
+  <div class="alert alert-info" id="indice">
+    🧠 Indice : <strong>{{ mot.indice }}</strong>
+  </div>
+
+  <h4>⭐ Score : <span id="score">{{ score }}</span></h4>
+
+  <form id="jeu-form">
+    {% csrf_token %}
+    <input type="text" id="reponse" name="reponse" placeholder="Ta réponse" class="form-control w-50 mx-auto" required>
+    <button type="submit" class="btn btn-primary mt-3">Valider</button>
+  </form>
+
+  <div class="mt-4">
+    <button id="btn-nouveau" class="btn btn-secondary">🔄 Nouveau mot</button>
+  </div>
+
+  <div id="resultat" class="mt-4 fs-5 fw-bold"></div>
+</div>
+
+<script>
+  setTimeout(function() {
+      const popup = document.getElementById('badge-popup');
+      if (popup) popup.style.display = 'none';
+  }, 5000);
+
+  document.getElementById('jeu-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const reponse = document.getElementById('reponse').value;
+
+    fetch("{% url 'verifier_reponse' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({ 'reponse': reponse })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('resultat').textContent = data.message;
+      document.getElementById('score').textContent = data.score;
+      document.getElementById('resultat').className = data.correct ? 'text-success' : 'text-danger';
+    });
+  });
+
+  document.getElementById('btn-nouveau').addEventListener('click', function() {
+    fetch("{% url 'nouveau_mot' %}")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('indice').innerHTML = "🧠 Indice : <strong>" + data.indice + "</strong>";
+        document.getElementById('resultat').textContent = data.message;
+        document.getElementById('reponse').value = '';
+        document.getElementById('resultat').className = 'text-info';
+      });
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+<script>
+    // Disparition après 5 secondes
+    setTimeout(function() {
+        const popup = document.getElementById('badge-popup');
+        if (popup) popup.style.display = 'none';
+    }, 5000);
+</script>
+
+{% endblock %}

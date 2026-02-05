@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>💰 Paiements des Enseignants</h2>
+    <a href="{% url 'ajouter_paiement_enseignant' %}" class="btn btn-primary mb-3">➕ Ajouter un paiement</a>
+
+    <p>Liste des paiements effectués pour les enseignants.</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Enseignant</th>
+                <th>Montant</th>
+                <th>Date</th>
+                <th>Mois concerné</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paiement in paiements %}
+            <tr>
+                <td>{{ paiement.enseignant }}</td>
+                <td>{{ paiement.montant }}</td>
+                <td>{{ paiement.date_paiement }}</td>
+                <td>{{ paiement.mois_concerne }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Aucun paiement enregistré.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

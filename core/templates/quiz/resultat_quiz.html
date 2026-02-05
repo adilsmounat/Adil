@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4 text-center text-success">🎉 Résultat du Quiz</h2>
+
+  <div class="card p-4 shadow-sm">
+    {% for item in reponses_corrigees %}
+  <div class="mb-3 p-3 border rounded bg-white">
+    <strong>Question {{ forloop.counter }} :</strong> {{ item.question.texte }}<br>
+    
+    <span>Votre réponse : 
+      <strong class="{% if item.est_correcte %}text-success{% else %}text-danger{% endif %}">
+        {{ item.reponse_donnee|default:"Aucune réponse" }}
+      </strong>
+    </span><br>
+
+    {% if not item.est_correcte %}
+      <span class="text-info">✅ Bonne réponse : {{ item.bonne_reponse }}</span>
+    {% endif %}
+  </div>
+{% endfor %}
+
+    <h4>Votre score : {{ score }} / {{ total }}</h4>
+
+    {% if score == total %}
+      <p class="text-success mt-3">Excellent travail ! 🎯</p>
+    {% elif score > total|divisibleby:2 %}
+      <p class="text-warning mt-3">Bon effort, mais vous pouvez faire mieux ! 💪</p>
+    {% else %}
+      <p class="text-danger mt-3">Continuez à réviser, vous y arriverez ! 📘</p>
+    {% endif %}
+
+    <a href="{% url 'cours_pour_eleve' %}" class="btn btn-primary mt-4">Retour aux cours</a>
+  </div>
+</div>
+{% endblock %}

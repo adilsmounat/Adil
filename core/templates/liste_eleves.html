@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="display-4">Bienvenue dans le tableau de bord</h1>
+  <p class="lead">Vous êtes connecté(e) en tant que <strong>{{ user.username }}</strong>.</p>
+</div>
+<div class="container-fluid">
+    <h2 class="mb-4">Liste des Élèves</h2>
+
+    <!-- Formulaire de recherche -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="nom" class="form-control" placeholder="🔍 Rechercher par nom" value="{{ request.GET.nom }}">
+        </div>
+        <div class="col-md-4">
+            <select name="classe" class="form-select">
+                <option value="">📚 Toutes les classes</option>
+                {% for c in classes %}
+                    <option value="{{ c }}" {% if request.GET.classe == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">🔎 Chercher</button>
+        </div>
+    </form>
+
+    <!-- Tableau des élèves -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Date de naissance</th>
+                    <th>Classe</th>
+                    <th>Parent</th>
+                    <th>Enseignant</th>
+                    <th>Transport</th>
+                    <th>Absences</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if donnees_eleves %}
+                    {% for data in donnees_eleves %}
+                        <tr>
+                            <td>{{ data.eleve.nom }}</td>
+                            <td>{{ data.eleve.prenom }}</td>
+                            <td>{{ data.eleve.naissance }}</td>
+                            <td>{{ data.eleve.classe }}</td>
+                            <td>{% if data.parent %}{{ data.parent.user.username }}{% else %}-{% endif %}</td>
+                            <td>
+                                {% if data.enseignants %}
+                                    {% for ens in data.enseignants %}
+                                        {{ ens.user.username }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if data.transport %}
+                                    {{ data.transport.chauffeur}} - {{ data.transport.numero_bus}}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ data.absences.count }} absence(s)</td>
+                            <td>
+                                {% for note in data.notes %}
+                                    {{ note.matiere }} : {{ note.note }}<br>
+                                {% empty %}
+                                    -
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">Aucun élève trouvé.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

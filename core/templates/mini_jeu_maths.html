@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5 text-center">
+{% if badge_gagne %}
+  <div id="badge-popup" class="alert alert-success text-center">
+    🏅 Félicitations ! Tu as gagné un badge !
+  </div>
+
+  <script>
+    setTimeout(function() {
+      const popup = document.getElementById('badge-popup');
+      if (popup) popup.style.display = 'none';
+    }, 5000);
+  </script>
+{% endif %}
+
+
+  <p>Résous : <strong>{{ a }} + {{ b }} = ?</strong></p>
+
+  <form id="math-form">
+    {% csrf_token %}
+    <input type="number" name="reponse" id="reponse" required class="form-control w-50 mx-auto">
+    <button type="submit" class="btn btn-success mt-2">Valider</button>
+  </form>
+
+  <div id="resultat" class="mt-3"></div>
+  <p>⭐ Score : <span id="score">{{ score }}</span></p>
+
+  <a href="{% url 'mini_jeu_maths' %}" class="btn btn-secondary mt-3">🔄 Nouvelle addition</a>
+</div>
+
+<script>
+document.getElementById('math-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const reponse = document.getElementById('reponse').value;
+
+  fetch("{% url 'verifier_addition' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({ 'reponse': reponse })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('resultat').textContent = data.message;
+    document.getElementById('resultat').className = data.correct ? 'text-success' : 'text-danger';
+    document.getElementById('score').textContent = data.score;
+  });
+});
+</script>
+<script>
+document.getElementById('jeu-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const reponse = document.getElementById('reponse').value;
+
+    fetch("{% url 'verifier_addition' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({ 'reponse': reponse })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('a').textContent = data.a;
+        document.getElementById('b').textContent = data.b;
+        document.getElementById('score').textContent = data.score;
+        document.getElementById('resultat').textContent = data.message;
+        document.getElementById('resultat').className = data.correct ? 'text-success' : 'text-danger';
+        document.getElementById('reponse').value = '';
+    });
+});
+
+document.getElementById('btn-nouveau').addEventListener('click', function() {
+    fetch("{% url 'nouvelle_addition' %}")
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('a').textContent = data.a;
+        document.getElementById('b').textContent = data.b;
+        document.getElementById('resultat').textContent = data.message;
+        document.getElementById('resultat').className = 'text-info';
+        document.getElementById('reponse').value = '';
+    });
+});
+</script>
+
+
+
+{% endblock %}

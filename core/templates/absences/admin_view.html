@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Liste des absences (édition autorisée)</h2>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Élève</th>
+      <th>Date</th>
+      <th>Motif</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for absence in absences %}
+      <tr>
+        <td>{{ absence.eleve }}</td>
+        <td>{{ absence.date }}</td>
+        <td>{{ absence.motif }}</td>
+        <td>
+          <a href="{% url 'modifier_absence' absence.id %}" class="btn btn-warning btn-sm">Modifier</a>
+          <a href="{% url 'supprimer_absence' absence.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a href="{% url 'ajouter_absence' %}" class="btn btn-primary">Ajouter une absence</a>
+{% endblock %}

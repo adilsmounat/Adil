@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block content %}
+<h2>{% if form.instance.pk %}Modifier{% else %}Ajouter{% endif %} un cours</h2>
+<form method="post">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="nom">Nom du cours :</label>
+    {{ form.nom|add_class:"form-control" }}
+  </div>
+
+  <div class="mb-3">
+    <label for="description">Description :</label>
+    {{ form.description|add_class:"form-control" }}
+  </div>
+
+  <button type="submit" class="btn btn-success">Enregistrer</button>
+</form>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Ajouter le cours</button>
+</form>
+
+
+
+{% endblock %}

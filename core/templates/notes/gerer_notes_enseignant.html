@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-4">🧾 Mes notes</h3>
+
+    <a href="{% url 'ajouter_note' %}" class="btn btn-success mb-3">➕ Ajouter une note</a>
+
+    {% if notes %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Élève</th>
+                    <th>Classe</th>
+                    <th>Matière</th>
+                    <th>Note</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notes %}
+                <tr>
+                    <td>{{ note.eleve.prenom }} {{ note.eleve.nom }}</td>
+                    <td>{{ note.eleve.classe }}</td>
+                    <td>{{ note.matiere }}</td>
+                    <td><strong>{{ note.note }}</strong></td>
+                    <td>{{ note.date }}</td>
+                    <td>
+                        <a href="{% url 'modifier_note' note.id %}" class="btn btn-sm btn-primary">✏️ Modifier</a>
+                        <a href="{% url 'supprimer_note' note.id %}" class="btn btn-sm btn-danger">🗑️ Supprimer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Aucune note trouvée.</p>
+    {% endif %}
+</div>
+{% endblock %}

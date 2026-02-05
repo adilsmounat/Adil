@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>🗺️ Itinéraire pour {{ eleve.prenom }} {{ eleve.nom }}</h3>
+  <p class="text-muted">Position du transport mise à jour automatiquement.</p>
+
+  <div id="map" style="height: 500px;"></div>
+  <div class="d-flex flex-wrap gap-2 mt-2">
+    <span id="status" class="text-muted"></span>
+    <span id="lastUpdate" class="text-muted"></span>
+    <span id="movement" class="badge bg-secondary">Statut: —</span>
+  </div>
+</div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<!-- Leaflet Routing Machine CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Routing Machine JS -->
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const map = L.map('map').setView([33.00276086904889, -7.650432586669923], 13);
+
+    // Base map
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const startPoint = L.latLng(33.00276086904889, -7.650432586669923);
+
+    const stops = [
+      {
+        latlng: L.latLng(33.01024248555228, -7.608203887939454),
+        label: "Arrêt 1",
+        horaire: "07:30"
+      },
+      {
+        latlng: L.latLng(32.998300372684476, -7.606658935546876),
+        label: "Arrêt 2",
+        horaire: "07:40"
+      },
+      {
+        latlng: L.latLng(33.00434357161489, -7.640819549560548),
+        label: "Arrêt 3",
+        horaire: "07:50"
+      }
+    ];
+
+    // Itinéraire
+    L.Routing.control({
+      waypoints: [
+        startPoint,
+        ...stops.map(s => s.latlng)
+      ],
+      lineOptions: {
+        styles: [{ color: 'blue', weight: 5 }]
+      },
+      createMarker: function(i, wp) {
+        if (i === 0) {
+          return L.marker(wp.latLng).bindPopup("Départ (école)");
+        } else {
+          const stop = stops[i - 1]; // i-1 car le 0 est le départ
+          return L.marker(wp.latLng).bindPopup(
+            `<strong>${stop.label}</strong><br>🕒 Heure prévue : ${stop.horaire}`
+          );
+        }
+      },
+      routeWhileDragging: false
+    }).addTo(map);
+
+    let busMarker = null;
+    let lastLatLng = null;
+    const statusEl = document.getElementById('status');
+    const lastUpdateEl = document.getElementById('lastUpdate');
+    const movementEl = document.getElementById('movement');
+
+    function updateMovementStatus(currentLatLng) {
+      if (!lastLatLng) {
+        movementEl.textContent = "Statut: —";
+        movementEl.className = "badge bg-secondary";
+        lastLatLng = currentLatLng;
+        return;
+      }
+
+      const distance = currentLatLng.distanceTo(lastLatLng);
+      if (distance > 8) {
+        movementEl.textContent = "Statut: En route";
+        movementEl.className = "badge bg-success";
+      } else {
+        movementEl.textContent = "Statut: À l'arrêt";
+        movementEl.className = "badge bg-warning text-dark";
+      }
+      lastLatLng = currentLatLng;
+    }
+
+    async function fetchPosition() {
+      try {
+        const res = await fetch("{% url 'transport_position_parent' eleve.id %}");
+        const data = await res.json();
+        if (data.status === 'ok') {
+          const latlng = L.latLng(data.latitude, data.longitude);
+          if (!busMarker) {
+            busMarker = L.marker(latlng, { title: "Transport" }).addTo(map);
+          } else {
+            busMarker.setLatLng(latlng);
+          }
+          statusEl.textContent = "Dernière position reçue.";
+          lastUpdateEl.textContent = `Mise à jour: ${new Date().toLocaleTimeString()}`;
+          updateMovementStatus(latlng);
+        } else {
+          statusEl.textContent = "Position non disponible pour le moment.";
+          movementEl.textContent = "Statut: —";
+          movementEl.className = "badge bg-secondary";
+        }
+      } catch (e) {
+        statusEl.textContent = "Erreur de mise à jour de la position.";
+        movementEl.textContent = "Statut: —";
+        movementEl.className = "badge bg-secondary";
+      }
+    }
+
+    fetchPosition();
+    setInterval(fetchPosition, 10000);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+
+
+
+<!-- Corps de la page -->
+
+<!-- Liste des transports -->
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Élève</th>
+      <th>Moyen</th>
+      <th>Chauffeur</th>
+      <th>Numéro Bus</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in transports %}
+    <tr>
+      <td>{{ t.eleve.nom }}</td>
+      <td>{{ t.moyen }}</td>
+      <td>{{ t.chauffeur }}</td>
+      <td>{{ t.numero_bus }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Formulaire d'ajout -->
+<hr>
+<h5>➕ Ajouter un transport</h5>
+<form id="formAjoutTransport" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <!-- Champs cachés pour coordonnées -->
+  <input type="hidden" id="id_latitude" name="latitude">
+  <input type="hidden" id="id_longitude" name="longitude">
+
+  <button type="submit" class="btn btn-primary">Ajouter</button>
+
+<a href="{% url 'localisation_point_depart' %}" target="_blank" class="btn btn-outline-secondary mt-2">
+  🌍 Choisir le point de départ sur la carte
+</a>
+
+
+</form>
+

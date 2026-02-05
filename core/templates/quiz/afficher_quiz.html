@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Quiz – {{ cours.nom }}</h2>
+
+<form method="post">
+    <p>Nombre de quiz récupéré : {{ quiz|length }}</p>
+
+  {% csrf_token %}
+  {% for q in quiz %}
+     <div class="mb-4">
+    <strong>Question {{ forloop.counter }} : {{ q.question }}</strong><br>
+    <input type="radio" name="q{{ q.id }}" value="{{ q.choix_1 }}"> {{ q.choix_1 }}<br>
+    <input type="radio" name="q{{ q.id }}" value="{{ q.choix_2 }}"> {{ q.choix_2 }}<br>
+    <input type="radio" name="q{{ q.id }}" value="{{ q.choix_3 }}"> {{ q.choix_3 }}<br>
+  </div>
+  {% endfor %}
+  <button class="btn btn-success" type="submit">Soumettre</button>
+</form>
+{% endblock %}

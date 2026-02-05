@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Mon enfant</h2>
+  {% if eleve %}
+    <ul>
+      <li><strong>Nom :</strong> {{ eleve.nom }}</li>
+      <li><strong>Prénom :</strong> {{ eleve.prenom }}</li>
+      <li><strong>Classe :</strong> {{ eleve.classe }}</li>
+    </ul>
+  {% else %}
+    <p>Aucun élève lié à ce compte.</p>
+  {% endif %}
+{% endblock %}

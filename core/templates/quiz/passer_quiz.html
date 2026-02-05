@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">📝 Quiz – {{ quiz.titre }}</h2>
+
+  {% if questions %}
+    <div id="timer" class="alert alert-info text-center fs-5 fw-bold"></div>
+
+    <form method="post">
+      {% csrf_token %}
+      {% for question in questions %}
+        <div class="mb-4 p-3 border rounded shadow-sm">
+          <strong>Question {{ forloop.counter }} :</strong> {{ question.texte }}<br>
+
+          {% for choix in question.get_choix %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q{{ question.id }}" value="{{ choix }}" required>
+              <label class="form-check-label">{{ choix }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-success mt-3 w-100">
+        ✅ Soumettre mes réponses
+      </button>
+    </form>
+
+    <script>
+      let duree = {{ quiz.duree_minutes|default:5 }} * 60;  // Durée en secondes
+      const timerDisplay = document.getElementById('timer');
+      const form = document.querySelector('form');
+
+      function updateTimer() {
+        const minutes = Math.floor(duree / 60);
+        const secondes = duree % 60;
+        timerDisplay.textContent = `⏳ Temps restant : ${minutes}m ${secondes < 10 ? '0' : ''}${secondes}s`;
+
+        if (duree <= 0) {
+          clearInterval(interval);
+          alert("⏰ Temps écoulé ! Le quiz va être soumis automatiquement.");
+          form.submit();
+        }
+
+        duree--;
+      }
+
+      const interval = setInterval(updateTimer, 1000);
+      updateTimer();  // Lancer immédiatement
+    </script>
+
+  {% else %}
+    <p class="text-muted">Aucune question disponible pour ce quiz.</p>
+  {% endif %}
+</div>
+{% endblock %}

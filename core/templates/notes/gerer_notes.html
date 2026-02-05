@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark">
+            📝 <strong>Gestion des Notes</strong>
+        </h2>
+        <a href="{% url 'ajouter_note' %}" class="btn btn-success">
+            ➕ Ajouter une note
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <h5 class="mb-2">Ajout rapide</h5>
+                <form method="post" class="row g-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="quick_add" value="1">
+                    <div class="col-md-4">
+                        <select name="eleve" class="form-select" required>
+                            <option value="">Choisir un élève</option>
+                            {% for e in eleves %}
+                                <option value="{{ e.id }}">{{ e.nom }} {{ e.prenom }} ({{ e.classe }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="matiere" class="form-control" placeholder="Matière" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" step="0.1" name="note" class="form-control" placeholder="Note" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" name="date" class="form-control">
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+
+            <form method="get" class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" name="q" class="form-control" placeholder="Rechercher un élève"
+                           value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="classe" class="form-select">
+                        <option value="">Toutes classes</option>
+                        {% for c in classes %}
+                            <option value="{{ c }}" {% if request.GET.classe == c %}selected{% endif %}>
+                                {{ c }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="matiere" class="form-select">
+                        <option value="">Toutes matières</option>
+                        {% for m in matieres %}
+                            <option value="{{ m }}" {% if request.GET.matiere == m %}selected{% endif %}>
+                                {{ m }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.1" name="min_note" class="form-control" placeholder="Note min"
+                           value="{{ request.GET.min_note }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.1" name="max_note" class="form-control" placeholder="Note max"
+                           value="{{ request.GET.max_note }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="date_debut" class="form-control" value="{{ request.GET.date_debut }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="date_fin" class="form-control" value="{{ request.GET.date_fin }}">
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Filtrer</button>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <a href="{% url 'gerer_notes' %}" class="btn btn-outline-secondary">Réinitialiser</a>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}export=csv" class="btn btn-outline-dark">
+                        Exporter CSV
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if notes %}
+                <div class="table-responsive">
+                   <table class="table table-hover mt-4">
+    <thead class="table-dark">
+        <tr>
+            <th>👤 Élève</th>
+            <th>📘 Matière</th>
+            <th>📝 Note</th>
+            <th>📅 Date</th>
+            <th>⚙️ Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for note in notes %}
+        <tr>
+            <td>{{ note.eleve }}</td>
+            <td>{{ note.matiere }}</td>
+            <td>{{ note.note }}</td>
+            <td>{{ note.date|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'modifier_note' note.id %}" class="btn btn-sm btn-warning">✏️ Modifier</a>
+                <a href="{% url 'supprimer_note' note.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Confirmer la suppression ?');">🗑️ Supprimer</a>
+            </td>
+        </tr>
+             {% empty %}
+             <tr>
+            <td colspan="5" class="text-center">Aucune note enregistrée pour le moment.</td>
+           </tr>
+              {% endfor %}
+           </tbody>
+            </table>
+
+                </div>
+            {% else %}
+                <p class="text-center text-muted">Aucune note enregistrée pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

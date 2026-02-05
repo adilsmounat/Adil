@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Itinéraire Scolaire</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <style>
+    #map { height: 90vh; width: 100%; }
+  </style>
+</head>
+<body>
+
+<h2>🚌 Itinéraire des arrêts de bus (Settat)</h2>
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const bounds = L.latLngBounds([32.95, -7.7], [33.05, -7.5]);
+
+const map = L.map("map", {
+  maxBounds: bounds,
+  maxBoundsViscosity: 1.0
+}).setView([33.0027, -7.6504], 13);
+
+// Fond de carte
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors"
+}).addTo(map);
+
+// Rectangle limite
+L.rectangle(bounds, {color: "#ff7800", weight: 2}).addTo(map);
+
+// ➤ Départ
+const startPoint = {
+  name: "Départ (École)",
+  lat: 33.00276086904889,
+  lng: -7.650432586669923
+};
+
+// ➤ Arrêts avec horaires
+const busStops = [
+  { name: "Arrêt 1", lat: 33.01024248555228, lng: -7.608203887939454, horaire: "07:30" },
+  { name: "Arrêt 2", lat: 32.998300372684476, lng: -7.606658935546876, horaire: "07:40" },
+  { name: "Arrêt 3", lat: 33.00434357161489, lng: -7.640819549560548, horaire: "07:50" }
+];
+
+// ➤ Afficher les marqueurs
+L.marker([startPoint.lat, startPoint.lng])
+  .addTo(map)
+  .bindPopup(`🏫 <strong>${startPoint.name}</strong>`);
+
+busStops.forEach(stop => {
+  L.marker([stop.lat, stop.lng])
+    .addTo(map)
+    .bindPopup(`🚏 <strong>${stop.name}</strong><br>🕒 Horaire : ${stop.horaire}`);
+});
+
+// ➤ Colorer les segments entre chaque point
+const colors = ["blue", "green", "red", "orange", "purple"];
+let lastPoint = L.latLng(startPoint.lat, startPoint.lng);
+
+busStops.forEach((stop, index) => {
+  const currentPoint = L.latLng(stop.lat, stop.lng);
+
+  L.polyline([lastPoint, currentPoint], {
+    color: colors[index % colors.length],
+    weight: 5
+  }).addTo(map);
+
+  lastPoint = currentPoint;
+});
+
+// ➤ Optionnel : afficher coordonnées au clic
+map.on("click", function (e) {
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+  console.log(`Clique : ${lat}, ${lng}`);
+});
+</script>
+
+</body>
+</html>

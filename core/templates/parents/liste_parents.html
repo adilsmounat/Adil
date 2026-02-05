@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-3">👨‍👩‍👧 Parents</h3>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Nom</th>
+          <th>Utilisateur</th>
+          <th>Téléphone</th>
+          <th>Email</th>
+          <th>Élève</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for parent in parents %}
+          <tr>
+            <td>{{ parent.nom }}</td>
+            <td>{{ parent.user.username }}</td>
+            <td>{{ parent.telephone }}</td>
+            <td>{{ parent.email }}</td>
+            <td>{% if parent.eleve %}{{ parent.eleve.prenom }} {{ parent.eleve.nom }}{% else %}-{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted">Aucun parent trouvé.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

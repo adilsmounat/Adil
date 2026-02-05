@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>📊 Statistiques</h2>
+  {% for score in quiz_scores %}
+    <p>{{ score.quiz.titre }} : {{ score.score }}/{{ score.total }}</p>
+  {% empty %}
+    <p class="text-muted">Aucune statistique disponible.</p>
+  {% endfor %}
+</div>
+{% endblock %}

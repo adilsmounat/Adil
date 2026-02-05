@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .teacher-hero {
+    background: linear-gradient(120deg, #1d3557, #457b9d);
+    color: #fff;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(29, 53, 87, 0.2);
+  }
+  .teacher-hero h2 {
+    margin: 0;
+    font-weight: 700;
+  }
+  .teacher-hero .quick-actions .btn {
+    border-radius: 10px;
+  }
+  .stat-card {
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+  .stat-card .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .section-title {
+    font-weight: 700;
+    color: #1d3557;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    color: #1f2937;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .course-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .course-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+  }
+  .muted {
+    color: #6b7280;
+  }
+  .activity-table td, .activity-table th {
+    vertical-align: middle;
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="teacher-hero mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h2>Bienvenue {{ enseignant.user.last_name }}</h2>
+        <p class="mb-0 muted text-white-50">Résumé rapide de vos classes, notes et cours.</p>
+      </div>
+      <div class="quick-actions d-flex flex-wrap gap-2">
+        <a href="{% url 'ajouter_note' %}" class="btn btn-light">➕ Ajouter une note</a>
+        <a href="{% url 'ajouter_absence' %}" class="btn btn-outline-light">➕ Ajouter une absence</a>
+        <a href="{% url 'ajouter_cours' %}" class="btn btn-warning">➕ Nouveau cours</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-2">
+      <div class="card stat-card p-3">
+        <div class="muted">Élèves</div>
+        <div class="stat-value">{{ stats.total_eleves }}</div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="card stat-card p-3">
+        <div class="muted">Moyenne notes</div>
+        <div class="stat-value">{{ stats.avg_notes|floatformat:1 }}</div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="card stat-card p-3">
+        <div class="muted">Absences</div>
+        <div class="stat-value">{{ stats.total_absences }}</div>
+        <small class="text-danger">{{ stats.absences_7j }} ces 7 jours</small>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="card stat-card p-3">
+        <div class="muted">Notes données</div>
+        <div class="stat-value">{{ stats.total_notes }}</div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="card stat-card p-3">
+        <div class="muted">Cours</div>
+        <div class="stat-value">{{ stats.total_cours }}</div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="card stat-card p-3">
+        <div class="muted">Quiz</div>
+        <div class="stat-value">{{ stats.total_quiz }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-5">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Répartition par classe</h5>
+        {% if stats.total_eleves %}
+          {% for c in eleves_par_classe %}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="chip">Classe {{ c.classe|default:"—" }}</span>
+              <strong>{{ c.total }}</strong>
+            </div>
+            <div class="progress mb-2" style="height: 8px;">
+              <div class="progress-bar bg-info" style="width: {% widthratio c.total stats.total_eleves 100 %}%"></div>
+            </div>
+          {% empty %}
+            <p class="text-muted">Aucune classe attribuée.</p>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">Aucun élève attribué pour l’instant.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Dernières notes</h5>
+        <div class="table-responsive">
+          <table class="table table-sm activity-table">
+            <thead class="table-light">
+              <tr>
+                <th>Élève</th>
+                <th>Matière</th>
+                <th>Note</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for note in notes_recentes %}
+                <tr>
+                  <td>{{ note.eleve }}</td>
+                  <td>{{ note.matiere }}</td>
+                  <td><span class="chip">{{ note.note }}</span></td>
+                  <td>{{ note.date|date:"d/m/Y" }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-muted">Aucune note récente.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <a href="{% url 'gerer_notes' %}" class="btn btn-outline-primary btn-sm">Gérer les notes</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Absences récentes</h5>
+        <div class="table-responsive">
+          <table class="table table-sm activity-table">
+            <thead class="table-light">
+              <tr>
+                <th>Élève</th>
+                <th>Date</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for absence in absences_recentes %}
+                <tr>
+                  <td>{{ absence.eleve.nom }} {{ absence.eleve.prenom }}</td>
+                  <td>{{ absence.date|date:"d/m/Y" }}</td>
+                  <td>
+                    {% if absence.justifiee %}
+                      <span class="badge bg-success">Justifiée</span>
+                    {% else %}
+                      <span class="badge bg-danger">Non justifiée</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" class="text-muted">Aucune absence récente.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <a href="{% url 'liste_absences' %}" class="btn btn-outline-warning btn-sm">Gérer les absences</a>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Élèves suivis</h5>
+        {% for eleve in eleves %}
+          <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+              <strong>{{ eleve.nom }} {{ eleve.prenom }}</strong>
+              <div class="muted">Classe {{ eleve.classe|default:"—" }}</div>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-muted">Aucun élève attribué.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Moyenne des notes par matière</h5>
+        <canvas id="notesChart" height="220"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Absences des 7 derniers jours</h5>
+        <canvas id="absencesChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card stat-card p-3">
+        <h5 class="section-title mb-3">Répartition des élèves par classe</h5>
+        <canvas id="classesChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card stat-card p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="section-title mb-0">Cours gérés</h5>
+      <a href="{% url 'liste_cours' %}" class="btn btn-outline-dark btn-sm">Voir tous les cours</a>
+    </div>
+
+    {% if cours %}
+      <div class="row g-3">
+        {% for cours_item in cours %}
+          <div class="col-md-6 col-lg-4">
+            <div class="course-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">{{ cours_item.nom }}</h6>
+                <span class="chip">Classe {{ cours_item.classe|default:"—" }}</span>
+              </div>
+              <p class="muted">{{ cours_item.description|truncatechars:120 }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="chip">{{ cours_item.quiz_count }} quiz</span>
+                <div class="d-flex gap-2">
+                  <a href="{% url 'ajouter_quiz' cours_item.id %}" class="btn btn-sm btn-outline-warning">Ajouter quiz</a>
+                  <a href="{% url 'afficher_quiz' cours_item.id %}" class="btn btn-sm btn-outline-primary">Voir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Aucun cours trouvé pour l’instant.</p>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const notesLabels = {{ chart_notes_labels|safe }};
+  const notesValues = {{ chart_notes_values|safe }};
+  const absencesLabels = {{ chart_absences_labels|safe }};
+  const absencesValues = {{ chart_absences_values|safe }};
+  const classesLabels = {{ chart_classes_labels|safe }};
+  const classesValues = {{ chart_classes_values|safe }};
+
+  const notesCtx = document.getElementById('notesChart').getContext('2d');
+  new Chart(notesCtx, {
+    type: 'bar',
+    data: {
+      labels: notesLabels,
+      datasets: [{
+        label: 'Moyenne',
+        data: notesValues,
+        backgroundColor: '#457b9d'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 20 }
+      }
+    }
+  });
+
+  const absencesCtx = document.getElementById('absencesChart').getContext('2d');
+  new Chart(absencesCtx, {
+    type: 'line',
+    data: {
+      labels: absencesLabels,
+      datasets: [{
+        label: 'Absences',
+        data: absencesValues,
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,0.2)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  const classesCtx = document.getElementById('classesChart').getContext('2d');
+  new Chart(classesCtx, {
+    type: 'doughnut',
+    data: {
+      labels: classesLabels,
+      datasets: [{
+        data: classesValues,
+        backgroundColor: ['#1d3557', '#457b9d', '#a8dadc', '#f1faee', '#e63946', '#ffbe0b']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

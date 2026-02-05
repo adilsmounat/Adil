@@ -1,0 +1,24 @@
+<h2>🎓 Résous ce petit problème (niveau {{ niveau }})</h2>
+
+{% if probleme %}
+  <p>{{ probleme.question }}</p>
+
+  {% if probleme.image %}
+    <img src="{{ probleme.image.url }}" alt="Illustration" style="max-width: 300px;">
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="probleme_id" value="{{ probleme.id }}">
+    <input type="text" name="reponse" placeholder="Ta réponse" required>
+    <button>Valider</button>
+  </form>
+
+  {% if message %}
+    <p style="margin-top: 15px;">{{ message }}</p>
+  {% endif %}
+{% else %}
+  <p>😢 Aucun problème disponible pour ce niveau.</p>
+{% endif %}
+
+<a href="?niveau={{ niveau }}">➕ Nouveau problème</a>

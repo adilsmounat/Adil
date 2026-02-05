@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>💳 Paiements des élèves</h2>
+    <a href="{% url 'ajouter_paiement_eleve' %}" class="btn btn-success mb-3">➕ Ajouter un paiement</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Élève</th>
+                <th>Mois</th>
+                <th>Montant (€)</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paiement in paiements %}
+            <tr>
+                <td>{{ paiement.eleve.nom }}</td>
+                <td>{{ paiement.mois_concerne }}</td>
+                <td>{{ paiement.montant }}</td>
+                <td>{{ paiement.date_paiement }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Aucun paiement enregistré.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

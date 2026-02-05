@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+ {% if notes %}
+  <table class="table table-striped mt-2">
+    <thead>
+      <tr>
+        <th>Matière</th>
+        <th>Note</th>
+        <th>date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for note in notes %}
+      <tr>
+        <td>{{ note.matiere }}</td>
+        <td>{{ note.note }}</td>
+        <td>{{ note.date }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-muted">Aucune note disponible.</p>
+  {% endif %}
+</div>
+{% endblock %}

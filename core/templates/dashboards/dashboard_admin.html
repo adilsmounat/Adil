@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --brand: #111827;
+    --accent: #f97316;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  }
+
+  .admin-shell {
+    font-family: "Manrope", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.08), transparent 45%),
+                radial-gradient(circle at 10% 20%, rgba(249, 115, 22, 0.12), transparent 40%),
+                var(--surface-2);
+    padding-bottom: 32px;
+  }
+
+  .hero {
+    margin-top: 20px;
+    background: linear-gradient(120deg, #0f172a, #111827, #1f2937);
+    color: #fff;
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: var(--shadow);
+  }
+
+  .hero .subtitle {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .stat-card {
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    padding: 18px;
+    height: 100%;
+  }
+
+  .stat-card .label {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .panel {
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    height: 100%;
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .panel-body {
+    padding: 14px 16px;
+  }
+
+  .list-clean {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .list-clean li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+  .list-clean li:last-child {
+    border-bottom: 0;
+  }
+
+  .btn-soft {
+    background: #111827;
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+  }
+</style>
+
+<div class="container admin-shell">
+  <div class="hero">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h2 class="mb-1">Tableau de bord — Administration</h2>
+        <p class="subtitle mb-0">Gérez l’ensemble de l’école : utilisateurs, cours, paiements, transport et notifications.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="pill"><i class="fas fa-users"></i> {{ nb_eleves|default:0 }} élèves</span>
+        <span class="pill"><i class="fas fa-chalkboard-teacher"></i> {{ nb_enseignants|default:0 }} enseignants</span>
+        <span class="pill"><i class="fas fa-user-friends"></i> {{ nb_parents|default:0 }} parents</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="label">Cours</div>
+        <div class="value">{{ nb_cours }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="label">Quiz</div>
+        <div class="value">{{ nb_quiz }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="label">Notes</div>
+        <div class="value">{{ nb_notes }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="label">Absences</div>
+        <div class="value">{{ nb_absences }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-2">
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-users me-2"></i> Gestion des utilisateurs</div>
+        <div class="panel-body">
+          <p class="text-muted">Créer, modifier et consulter élèves, parents et enseignants.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'liste_eleves' %}" class="btn btn-outline-primary">Élèves</a>
+            <a href="{% url 'liste_parents' %}" class="btn btn-outline-secondary">Parents</a>
+            <a href="{% url 'liste_enseignants' %}" class="btn btn-outline-info">Enseignants</a>
+            <a href="{% url 'ajouter_eleve' %}" class="btn btn-soft">+ Ajouter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-book me-2"></i> Cours & Quiz</div>
+        <div class="panel-body">
+          <p class="text-muted">Superviser les cours, quiz et contenus pédagogiques.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'liste_cours' %}" class="btn btn-outline-dark">Cours</a>
+            <a href="{% url 'liste_cours' %}" class="btn btn-outline-warning">Quiz</a>
+            <a href="{% url 'ajouter_cours' %}" class="btn btn-soft">+ Nouveau cours</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-credit-card me-2"></i> Paiements</div>
+        <div class="panel-body">
+          <p class="text-muted">Gérer les paiements des élèves et enseignants.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'gestion_paiement' %}" class="btn btn-outline-dark">Tableau paiements</a>
+            <a href="{% url 'paiements_eleves' %}" class="btn btn-outline-success">Élèves</a>
+            <a href="{% url 'paiements_enseignants' %}" class="btn btn-outline-secondary">Enseignants</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-bus me-2"></i> Transport</div>
+        <div class="panel-body">
+          <p class="text-muted">Superviser les transports et la localisation en temps réel.</p>
+          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalTransports">
+            🚍 Gérer les transports
+          </button>
+          <div class="mt-3" id="transport-admin-feed">
+            <div class="text-muted">Chargement des positions…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-chart-line me-2"></i> Statistiques</div>
+        <div class="panel-body">
+          <canvas id="classesChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-bell me-2"></i> Notifications & Logs</div>
+        <div class="panel-body">
+          <p class="text-muted">Dernières notifications envoyées aux parents.</p>
+          <ul class="list-clean">
+            {% if recent_notifications %}
+              {% for notif in recent_notifications %}
+                <li>
+                  <strong>{{ notif.titre }}</strong><br>
+                  <span class="text-muted">{{ notif.message }}</span><br>
+                  <small class="text-muted">{{ notif.created_at|date:"d/m/Y H:i" }}</small>
+                </li>
+              {% endfor %}
+            {% else %}
+              <li class="text-muted">Aucune notification.</li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-chart-pie me-2"></i> Vue globale</div>
+        <div class="panel-body">
+          <canvas id="countsChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🌐 MODALE DE TRANSPORT -->
+<div class="modal fade" id="modalTransports" tabindex="-1" aria-labelledby="modalTransportsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTransportsLabel">🚍 Gestion des transports</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body" id="contenu-transport">
+        <div class="text-center">Chargement...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modal = document.getElementById('modalTransports');
+  modal.addEventListener('show.bs.modal', function () {
+    fetch("{% url 'liste_transport' %}")
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById("contenu-transport").innerHTML = html;
+      })
+      .catch(() => {
+        document.getElementById("contenu-transport").innerHTML = "<div class='text-danger'>Erreur lors du chargement.</div>";
+      });
+  });
+
+  const classesLabels = {{ chart_classes_labels|safe }};
+  const classesValues = {{ chart_classes_values|safe }};
+  const countsLabels = {{ chart_counts_labels|safe }};
+  const countsValues = {{ chart_counts_values|safe }};
+
+  const classesCtx = document.getElementById('classesChart');
+  if (classesCtx) {
+    new Chart(classesCtx, {
+      type: 'bar',
+      data: {
+        labels: classesLabels,
+        datasets: [{
+          label: 'Moyenne par classe',
+          data: classesValues,
+          backgroundColor: '#f97316'
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true, max: 20 } } }
+    });
+  }
+
+  const countsCtx = document.getElementById('countsChart');
+  if (countsCtx) {
+    new Chart(countsCtx, {
+      type: 'doughnut',
+      data: {
+        labels: countsLabels,
+        datasets: [{
+          data: countsValues,
+          backgroundColor: ['#0f172a', '#f97316', '#38bdf8', '#10b981', '#f59e0b']
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  async function refreshTransportFeed() {
+    const container = document.getElementById('transport-admin-feed');
+    try {
+      const res = await fetch("{% url 'liste_transport' %}");
+      const html = await res.text();
+      container.innerHTML = html;
+    } catch (e) {
+      container.innerHTML = "<div class='text-danger'>Erreur lors du chargement.</div>";
+    }
+  }
+
+  refreshTransportFeed();
+  setInterval(refreshTransportFeed, 15000);
+});
+</script>
+{% endblock %}
+

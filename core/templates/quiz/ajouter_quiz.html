@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">
+    <i class="fas fa-question-circle text-warning"></i> Ajouter un quiz pour le cours :
+    <span class="text-primary">{{ cours.nom }}</span>
+  </h2>
+
+  <form method="post" class="shadow p-4 bg-light rounded">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Titre du Quiz :</label>
+      <input type="text" name="titre" class="form-control" placeholder="Ex: Quiz sur le passé composé" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Question :</label>
+      <input type="text" name="question" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Choix 1 :</label>
+      <input type="text" name="choix_1" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Choix 2 :</label>
+      <input type="text" name="choix_2" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Choix 3 :</label>
+      <input type="text" name="choix_3" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Bonne réponse (copier le texte d’un des choix) :</label>
+      <input type="text" name="bonne_reponse" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      <i class="fas fa-save"></i> Enregistrer le quiz
+    </button>
+    <a href="{% url 'liste_cours' %}" class="btn btn-secondary ms-2">Annuler</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --brand: #0f766e;
+    --brand-2: #14b8a6;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+  }
+
+  .parent-shell {
+    font-family: "Space Grotesk", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: radial-gradient(circle at top right, rgba(20, 184, 166, 0.14), transparent 50%),
+                radial-gradient(circle at 10% 20%, rgba(15, 118, 110, 0.12), transparent 45%),
+                var(--surface-2);
+    padding-bottom: 32px;
+  }
+
+  .hero {
+    margin-top: 20px;
+    background: linear-gradient(120deg, #0f172a, #115e59, #0f766e);
+    color: #fff;
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: var(--shadow);
+  }
+
+  .hero .subtitle {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .child-card {
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    background: var(--surface);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+  }
+
+  .child-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: linear-gradient(140deg, #0f766e, #14b8a6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .child-meta {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 22px 20px;
+  }
+
+  .stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: var(--ink);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .panel {
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    height: 100%;
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .panel-body {
+    padding: 14px 16px;
+  }
+
+  .list-clean {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .list-clean li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+  .list-clean li:last-child {
+    border-bottom: 0;
+  }
+
+  .btn-soft {
+    background: #e0f2f1;
+    color: #0f766e;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+  }
+
+  .fade-in {
+    animation: fadeInUp 0.6s ease both;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="container parent-shell">
+  <div class="hero fade-in">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h2 class="mb-1">Bienvenue {{ parent.user.first_name }} {{ parent.user.last_name }}</h2>
+        <p class="subtitle mb-0">Un aperçu clair des progrès et du quotidien de vos enfants.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="pill"><i class="fas fa-users"></i> {{ enfants|length }} enfant(s)</span>
+        <span class="pill"><i class="fas fa-heart"></i> Suivi personnalisé</span>
+      </div>
+    </div>
+  </div>
+
+  {% if enfants %}
+    {% for enfant in enfants %}
+      <div class="child-card mt-4 fade-in">
+        <div class="child-header">
+          <div class="avatar">{{ enfant.prenom|slice:":1" }}</div>
+          <div>
+            <h5 class="mb-1">{{ enfant.nom }} {{ enfant.prenom }}</h5>
+            <div class="child-meta">Classe : {{ enfant.classe|default:"—" }}</div>
+          </div>
+        </div>
+        <div class="stats-bar">
+          <span class="stat-chip"><i class="fas fa-book"></i> {{ enfant.notes.all|length }} notes</span>
+          <span class="stat-chip"><i class="fas fa-calendar-times"></i> {{ enfant.absences.all|length }} absences</span>
+          <span class="stat-chip"><i class="fas fa-chalkboard-teacher"></i> {{ enfant.enseignants.all|length }} enseignants</span>
+          <span class="stat-chip"><i class="fas fa-bus"></i> {{ enfant.transport|yesno:"Transport ok,Transport non" }}</span>
+        </div>
+
+        <div class="card-body pt-0">
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="panel">
+                <div class="panel-header"><i class="fas fa-book me-2"></i> Notes récentes</div>
+                <div class="panel-body">
+                  <ul class="list-clean">
+                    {% for note in enfant.notes.all %}
+                      <li class="d-flex justify-content-between">
+                        <span>{{ note.matiere }}</span>
+                        <strong>{{ note.note }}/20</strong>
+                      </li>
+                    {% empty %}
+                      <li class="text-muted">Aucune note disponible.</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="panel">
+                <div class="panel-header"><i class="fas fa-calendar-times me-2"></i> Absences</div>
+                <div class="panel-body">
+                  <ul class="list-clean">
+                    {% for absence in enfant.absences.all %}
+                      <li class="d-flex justify-content-between align-items-center">
+                        <span>{{ absence.date|date:"j M Y" }} — {{ absence.motif|default:"—" }}</span>
+                        {% if absence.justifiee %}
+                          <span class="badge bg-success">Justifiée</span>
+                        {% else %}
+                          <span class="badge bg-warning text-dark">Non justifiée</span>
+                        {% endif %}
+                      </li>
+                    {% empty %}
+                      <li class="text-muted">Aucune absence.</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="panel">
+                <div class="panel-header"><i class="fas fa-chalkboard-teacher me-2"></i> Enseignants</div>
+                <div class="panel-body">
+                  {% if enfant.enseignants.all %}
+                    {% for enseignant in enfant.enseignants.all %}
+                      <div class="mb-2">
+                        <strong>Nom :</strong> {{ enseignant.user.get_full_name|default:enseignant.user.username }}<br>
+                        <strong>Spécialité :</strong> {{ enseignant.specialite }}
+                        <div class="mt-2">
+                          <a href="{% url 'contacter_enseignant' enseignant.id %}?eleve_id={{ enfant.id }}" class="btn btn-soft btn-sm">
+                            <i class="fas fa-envelope me-1"></i> Contacter
+                          </a>
+                        </div>
+                      </div>
+                      {% if not forloop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
+                  {% else %}
+                    <p class="text-muted mb-0">Aucun enseignant assigné.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="panel">
+                <div class="panel-header"><i class="fas fa-bus me-2"></i> Transport</div>
+                <div class="panel-body">
+                  {% if enfant.transport %}
+                    <p class="mb-1"><strong>Moyen :</strong> {{ enfant.transport.moyen }}</p>
+                    <p class="mb-3"><strong>Chauffeur :</strong> {{ enfant.transport.chauffeur }}</p>
+                    <div class="mb-3" style="height: 320px; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+                      <div class="transport-map" data-eleve-id="{{ enfant.id }}" style="height: 100%;"></div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center text-muted">
+                      <span class="transport-status" data-eleve-id="{{ enfant.id }}">Chargement de la position…</span>
+                      <span class="transport-update" data-eleve-id="{{ enfant.id }}"></span>
+                      <span class="transport-move badge bg-secondary" data-eleve-id="{{ enfant.id }}">Statut: —</span>
+                    </div>
+                  {% else %}
+                    <p class="text-muted mb-0">Aucun transport enregistré.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="panel">
+                <div class="panel-header"><i class="fas fa-calendar-alt me-2"></i> Emploi du temps</div>
+                <div class="panel-body text-center">
+                  <a href="#" class="btn btn-outline-dark">
+                    Voir l'emploi du temps de {{ enfant.prenom }}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="panel">
+                <div class="panel-header"><i class="fas fa-bell me-2"></i> Dernières notifications</div>
+                <div class="panel-body">
+                  <ul class="list-clean">
+                    {% if notifications %}
+                      {% for notif in notifications %}
+                        <li>
+                          <strong>{{ notif.titre }}</strong><br>
+                          <span class="text-muted">{{ notif.message }}</span><br>
+                          <small class="text-muted">{{ notif.created_at|date:"d/m/Y H:i" }}</small>
+                        </li>
+                      {% endfor %}
+                    {% else %}
+                      <li class="text-muted">Aucune notification pour le moment.</li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-warning text-center mt-4">
+      Aucun enfant associé à ce compte.
+    </div>
+  {% endif %}
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const maps = document.querySelectorAll(".transport-map");
+    maps.forEach((mapEl) => {
+      const eleveId = mapEl.dataset.eleveId;
+      const statusEl = document.querySelector(`.transport-status[data-eleve-id=\"${eleveId}\"]`);
+      const updateEl = document.querySelector(`.transport-update[data-eleve-id=\"${eleveId}\"]`);
+      const moveEl = document.querySelector(`.transport-move[data-eleve-id=\"${eleveId}\"]`);
+
+      const startPoint = L.latLng(33.00276086904889, -7.650432586669923);
+      const stops = [
+        L.latLng(33.01024248555228, -7.608203887939454),
+        L.latLng(32.998300372684476, -7.606658935546876),
+        L.latLng(33.00434357161489, -7.640819549560548)
+      ];
+
+      const map = L.map(mapEl).setView(startPoint, 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      L.Routing.control({
+        waypoints: [startPoint, ...stops],
+        lineOptions: {
+          styles: [{ color: '#0f766e', weight: 5 }]
+        },
+        addWaypoints: false,
+        draggableWaypoints: false,
+        routeWhileDragging: false,
+        show: false,
+        createMarker: function(i, wp) {
+          if (i === 0) {
+            return L.marker(wp.latLng).bindPopup("Départ (école)");
+          }
+          return L.marker(wp.latLng).bindPopup(`Arrêt ${i}`);
+        }
+      }).addTo(map);
+
+      let marker = null;
+      let lastLatLng = null;
+
+      function updateMovementStatus(currentLatLng) {
+        if (!lastLatLng) {
+          moveEl.textContent = "Statut: —";
+          moveEl.className = "transport-move badge bg-secondary";
+          lastLatLng = currentLatLng;
+          return;
+        }
+        const distance = currentLatLng.distanceTo(lastLatLng);
+        if (distance > 8) {
+          moveEl.textContent = "Statut: En route";
+          moveEl.className = "transport-move badge bg-success";
+        } else {
+          moveEl.textContent = "Statut: À l'arrêt";
+          moveEl.className = "transport-move badge bg-warning text-dark";
+        }
+        lastLatLng = currentLatLng;
+      }
+
+      async function fetchPosition() {
+        try {
+          const res = await fetch(`/transport/position/${eleveId}/`);
+          const data = await res.json();
+          if (data.status === 'ok') {
+            const latlng = L.latLng(data.latitude, data.longitude);
+            if (!marker) {
+              marker = L.marker(latlng, { title: "Transport" }).addTo(map);
+            } else {
+              marker.setLatLng(latlng);
+            }
+            map.setView(latlng, map.getZoom(), { animate: false });
+            statusEl.textContent = "Dernière position reçue.";
+            updateEl.textContent = `Mise à jour: ${new Date().toLocaleTimeString()}`;
+            updateMovementStatus(latlng);
+          } else {
+            statusEl.textContent = "Position non disponible pour le moment.";
+          }
+        } catch (e) {
+          statusEl.textContent = "Erreur de mise à jour de la position.";
+        }
+      }
+
+      fetchPosition();
+      setInterval(fetchPosition, 10000);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+<form method="post">
+  {% csrf_token %}
+  {{ form.nom.label }} : {{ form.nom }}
+  <br>
+  {{ form.prenom.label }} : {{ form.prenom }}
+  <br>
+  {{ form.date_naissance.label }} : {{ form.date_naissance }}
+  <br>
+  {{ form.classe.label }} : {{ form.classe }}
+  <br>
+  <button type="submit">Ajouter</button>
+</form>

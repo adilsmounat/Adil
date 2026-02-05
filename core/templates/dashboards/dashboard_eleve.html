@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #6b7280;
+    --brand: #2563eb;
+    --brand-2: #06b6d4;
+    --accent: #f59e0b;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  }
+
+  .dashboard-shell {
+    font-family: "Sora", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 55%),
+                radial-gradient(circle at 20% 20%, rgba(6, 182, 212, 0.12), transparent 40%),
+                var(--surface-2);
+  }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid #e2e8f0;
+    min-height: 100vh;
+    padding: 24px 18px;
+  }
+
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(140deg, #2563eb, #3b82f6, #06b6d4);
+    color: white;
+    font-size: 36px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+  }
+
+  .stat-card {
+    border-radius: 18px;
+    background-color: var(--surface);
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .stat-card i {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: var(--brand);
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 10px 14px;
+    color: #1f2937;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 10px;
+  }
+
+  .sidebar a:hover {
+    background-color: #eef2ff;
+    color: #1d4ed8;
+  }
+
+  .nav-section {
+    margin-top: 18px;
+  }
+
+  .hero-card {
+    background: linear-gradient(120deg, #0f172a, #1e3a8a, #2563eb);
+    color: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .hero-card .subtitle {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .panel-card {
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .panel-card .card-header {
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-weight: 700;
+  }
+
+  .quick-action {
+    border-radius: 10px;
+  }
+
+  .teacher-card {
+    border-radius: 16px;
+    border: 1px dashed #cbd5f5;
+    background: #f8faff;
+    padding: 16px;
+  }
+
+  .fade-in {
+    animation: fadeInUp 0.6s ease both;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="container-fluid dashboard-shell">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 sidebar">
+      <div class="text-center mb-4 fade-in">
+        <div class="profile-avatar">
+          {{ eleve.prenom|slice:":1" }}
+        </div>
+        <h5 class="mt-3 mb-1">{{ eleve.prenom }} {{ eleve.nom }}</h5>
+        <p class="text-muted mb-2">{{ eleve.classe }}</p>
+        <div class="text-warning">★★★★★</div>
+      </div>
+
+      <div class="nav-section">
+        <a href="{% url 'dashboard_eleve' %}"><i class="fas fa-tachometer-alt me-2"></i> Tableau de bord</a>
+        <a href="#"><i class="fas fa-user me-2"></i> Mon profil</a>
+        <a href="{% url 'cours_pour_eleve' %}"><i class="fas fa-book me-2"></i> Cours suivis</a>
+        <a href="{% url 'badges_eleve'  %}"><i class="fas fa-star me-2"></i> Badges</a>
+        <a href="{% url 'liste_absences' %}"><i class="fas fa-clock me-2"></i> Absences</a>
+        <a href="{% url 'stats_eleve'  %}"><i class="fas fa-chart-bar me-2"></i> Statistiques</a>
+        <a href="{% url 'notes_eleve' %}"><i class="fas fa-clipboard me-2"></i> Notes</a>
+      </div>
+
+      {% if enseignants %}
+        <div class="teacher-card mt-4 fade-in">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-chalkboard-teacher text-info fs-4"></i>
+            <div class="fw-bold">Mes Enseignants Référents</div>
+          </div>
+          <div class="mt-2">
+            {% for enseignant in enseignants %}
+              <div class="mb-2">
+                <strong>Nom :</strong> {{ enseignant.user.last_name }} {{ enseignant.user.first_name }}<br>
+                <strong>Spécialité :</strong> {{ enseignant.specialite }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="col-md-9 p-4">
+      <div class="hero-card mb-4 fade-in">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <h3 class="mb-1">Bienvenue {{ eleve.prenom }} 👋</h3>
+            <p class="subtitle mb-0">Ton espace d'apprentissage personnalisé pour suivre tes progrès.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="pill"><i class="fas fa-medal"></i> {{ badges|length }} badges</span>
+            <span class="pill"><i class="fas fa-book-open"></i> {{ cours|length }} cours</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="stat-card border-primary fade-in">
+            <i class="fas fa-book"></i>
+            <div class="stat-value">{{ cours|length }}</div>
+            <div class="text-muted">Cours suivis</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card border-success fade-in">
+            <i class="fas fa-check-circle"></i>
+            <div class="stat-value">1</div>
+            <div class="text-muted">Cours terminés</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card border-warning fade-in">
+            <i class="fas fa-star"></i>
+            <div class="stat-value">{{ badges|length }}</div>
+            <div class="text-muted">Badges</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel-card mt-4 fade-in">
+        <div class="card-header">
+          📊 Mes statistiques d'apprentissage
+        </div>
+        <div class="card-body">
+          {% if stats_apprentissage %}
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Moyenne des notes :</strong> {{ stats_apprentissage.moyenne_notes|default:"-" }}</p>
+                <div class="progress mb-3">
+                  <div class="progress-bar" role="progressbar"
+                       style="width: {{ stats_apprentissage.moyenne_notes|floatformat:0|default:0 }}0%;"
+                       aria-valuenow="{{ stats_apprentissage.moyenne_notes|default:0 }}"
+                       aria-valuemin="0" aria-valuemax="20">
+                  </div>
+                </div>
+
+                <p><strong>Moyenne aux quiz :</strong> {{ stats_apprentissage.moyenne_quiz|default:"-" }}</p>
+                <div class="progress mb-2">
+                  <div class="progress-bar bg-info" role="progressbar"
+                       style="width: {{ stats_apprentissage.moyenne_quiz|floatformat:0|default:0 }}0%;"
+                       aria-valuenow="{{ stats_apprentissage.moyenne_quiz|default:0 }}"
+                       aria-valuemin="0" aria-valuemax="10">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <p><strong>Badges obtenus :</strong> {{ stats_apprentissage.badges_total|default:"0" }}</p>
+                <p><strong>Nombre d'absences :</strong> {{ stats_apprentissage.absences|default:"0" }}</p>
+                <div class="d-flex gap-2 mt-3">
+                  <a href="{% url 'notes_eleve' %}" class="btn btn-outline-primary quick-action">
+                    <i class="fas fa-clipboard me-1"></i> Mes notes
+                  </a>
+                  <a href="{% url 'cours_pour_eleve' %}" class="btn btn-outline-light quick-action text-white" style="background:#2563eb;">
+                    <i class="fas fa-book-open me-1"></i> Mes cours
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <p>Aucune statistique disponible pour le moment.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-lg-7">
+          <div class="card panel-card fade-in">
+            <div class="card-header">🎯 Recommandations personnalisées</div>
+            <div class="card-body">
+              {% if recommandations %}
+                <ul class="mb-0">
+                  {% for reco in recommandations %}
+                    <li class="mb-1">{{ reco }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="mb-0">Pour l'instant, aucune recommandation particulière. Continue tes efforts 👍</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card panel-card fade-in">
+            <div class="card-header">🤖 Assistant IA</div>
+            <div class="card-body">
+              <p class="text-muted mb-3">Pose une question, reçois une explication claire et des conseils.</p>
+              <a href="{% url 'chatbot' %}" class="btn btn-primary w-100 quick-action">
+                Ouvrir mon assistant
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

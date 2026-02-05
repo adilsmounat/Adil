@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:600px; margin:auto; padding:20px;">
+  <h2>💬 Chatbot éducatif</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label for="question">Pose ta question :</label><br>
+    <input type="text" name="question" style="width:100%;" placeholder="Ex: Conjugue le verbe finir au présent"><br><br>
+    <button type="submit">Envoyer</button>
+  </form>
+
+  {% if reponse %}
+  <hr>
+  <h4>Réponse :</h4>
+  <p>{{ reponse }}</p>
+  {% endif %}
+</div>
+{% endblock %}

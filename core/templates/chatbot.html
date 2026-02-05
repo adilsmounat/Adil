@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="chat-container">
+    <h2 class="chat-title">🤖 Mon assistant éducatif</h2>
+    <div id="chat-area" class="chat-area">
+       {% if welcome %}
+        <div class="bubble bot">
+            <img src="https://img.icons8.com/emoji/24/robot-emoji.png" class="avatar" />
+            {{ welcome }}
+        </div>
+    {% endif %}
+        {% for msg in request.session.conversation %}
+            <div class="bubble {{ msg.role }}">
+                {% if msg.role == "bot" %}
+                    <img src="https://img.icons8.com/emoji/24/robot-emoji.png" alt="bot" class="avatar" />
+                {% else %}
+                    <img src="https://img.icons8.com/color/24/user.png" alt="user" class="avatar" />
+                {% endif %}
+                {{ msg.text }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <form id="chat-form" class="chat-form">
+        {% csrf_token %}
+        <input type="text" name="question" id="question-input" placeholder="Pose ta question..." autocomplete="off" required />
+        <button type="submit">Envoyer</button>
+    </form>
+</div>
+  <div style="text-align: right; margin-bottom: 10px;">
+    <button id="clear-chat" class="btn btn-outline-danger btn-sm">🗑️ Effacer la conversation</button>
+</div>
+
+<style>
+body {
+    background-color: #f3f6f9;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.chat-container {
+    max-width: 700px;
+    margin: 60px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+
+.chat-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 26px;
+    color: #333;
+}
+
+.chat-area {
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.bubble {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 20px;
+    max-width: 80%;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.user {
+    background-color: #d1e7dd;
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.bot {
+    background-color: #e8e8f5;
+    align-self: flex-start;
+}
+
+.avatar {
+    width: 24px;
+    height: 24px;
+}
+
+.chat-form {
+    display: flex;
+    gap: 10px;
+}
+
+#question-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.chat-form button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.chat-form button:hover {
+    background-color: #45a049;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('chat-form');
+    const chatArea = document.getElementById('chat-area');
+    const input = document.getElementById('question-input');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const question = input.value.trim();
+        if (!question) return;
+
+        chatArea.innerHTML += `
+            <div class="bubble user">
+                <img src="https://img.icons8.com/color/24/user.png" class="avatar" />
+                ${question}
+            </div>
+        `;
+        input.value = '';
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        // Loading bubble
+        const loadingBubble = document.createElement('div');
+        loadingBubble.className = 'bubble bot';
+        loadingBubble.innerHTML = `<img src="https://img.icons8.com/emoji/24/robot-emoji.png" class="avatar" /> <em>Rédaction en cours...</em>`;
+        chatArea.appendChild(loadingBubble);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        fetch("{% url 'chatbot' %}", {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ question })
+        })
+        .then(res => res.json())
+        .then(data => {
+            chatArea.removeChild(loadingBubble);
+            chatArea.innerHTML += `
+                <div class="bubble bot">
+                    <img src="https://img.icons8.com/emoji/24/robot-emoji.png" class="avatar" />
+                    ${data.reponse}
+                </div>
+            `;
+            chatArea.scrollTop = chatArea.scrollHeight;
+        });
+    });
+});
+document.getElementById('reset-btn').addEventListener('click', function () {
+    fetch("{% url 'chatbot' %}?reset=1")
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'reset') {
+                // Vide la conversation côté HTML
+                document.getElementById('chat-area').innerHTML = `
+                    <div class="bubble bot">
+                        <img src="https://img.icons8.com/emoji/24/robot-emoji.png" class="avatar" />
+                        Bonjour 👋 ! Je suis ton assistant éducatif. Pose-moi ta question.
+                    </div>
+                `;
+            }
+        });
+});
+
+
+
+
+</script>
+<script>
+function afficherExercice(exo) {
+  const container = document.createElement('div');
+  container.className = 'p-3';
+  container.innerHTML = `
+    <div class="card mb-3 border-info">
+      <div class="card-body">
+        <p>📘 <strong>${exo.consigne}</strong></p>
+        <p>${exo.question}</p>
+        <input type="text" id="reponseEleve" class="form-control mb-2" placeholder="Ta réponse ici">
+        <button class="btn btn-outline-primary" onclick="verifierReponse('${exo.reponse.replace(/'/g, "\\'")}')">Vérifier</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('chatbox').appendChild(container);
+}
+
+function verifierReponse(reponseAttendue) {
+  const saisie = document.getElementById('reponseEleve').value.trim();
+  if (normaliser(saisie) === normaliser(reponseAttendue)) {
+    alert("✅ Bravo ! C’est la bonne réponse !");
+    enregistrerBadge("Réussite - Exercice IA");
+  } else {
+    alert("❌ Essaie encore !");
+  }
+}
+
+function normaliser(txt) {
+  return txt.toLowerCase().replace(/[.,!?]/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function enregistrerBadge(titre) {
+  fetch("/api/ajouter_badge/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    body: JSON.stringify({ titre: titre })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "ok") {
+      console.log("🎖️ Badge ajouté !");
+    }
+  });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+<script>
+function afficherReponseAI(contenuRecu) {
+  try {
+    const exo = JSON.parse(contenuRecu);
+
+    if (exo.consigne && exo.question && exo.reponse) {
+      afficherExercice(exo);
+    } else {
+      afficherMessageIA("❗ Le format de l'exercice n'est pas valide.");
+    }
+
+  } catch (e) {
+    afficherMessageIA(contenuRecu);  // réponse normale (pas un exercice)
+  }
+}
+
+function afficherMessageIA(message) {
+  const msg = document.createElement('div');
+  msg.className = 'p-2';
+  msg.innerHTML = `<div class="alert alert-light">${message}</div>`;
+  document.getElementById('chatbox').appendChild(msg);
+}
+</script>
+
+
+
+
+{% endblock %}

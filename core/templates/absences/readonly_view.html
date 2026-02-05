@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Liste des absences (lecture seule)</h2>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Élève</th>
+      <th>Date</th>
+      <th>Motif</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for absence in absences %}
+      <tr>
+        <td>{{ absence.eleve }}</td>
+        <td>{{ absence.date }}</td>
+        <td>{{ absence.motif }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

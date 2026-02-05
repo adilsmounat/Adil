@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  body {
+    background: linear-gradient(-45deg, #f0f8ff, #e0f7fa, #ffe0f0, #f3e5f5);
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+  }
+
+  @keyframes gradientMove {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+
+  .game-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+    cursor: pointer;
+    background: white;
+  }
+
+  .game-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .game-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  .badge-card {
+    background: #f4f4f4;
+    border-radius: 10px;
+    padding: 10px 15px;
+    display: inline-block;
+    margin: 5px;
+  }
+
+  .badge-bleu { background-color: #e3f2fd; }
+  .badge-vert { background-color: #e8f5e9; }
+  .badge-orange { background-color: #fff3e0; }
+  .badge-gris { background-color: #eceff1; }
+
+  .emoji {
+    font-size: 20px;
+    margin-right: 5px;
+  }
+
+  .progress-container {
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  .alert-success {
+  background: linear-gradient(to right, #a8e063, #56ab2f);
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+.card-assistant {
+  background: #e3f2fd;
+  border-left: 5px solid #42a5f5;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+
+</style>
+
+<!-- 🔹 Élève + Badges -->
+<div class="card p-3 mb-4">
+  <p>👤 Élève : {{ eleve.prenom }} {{ eleve.nom }}</p>
+  <p>🎓 Niveau : {{ eleve.classe }}</p>
+  <p>🏅 Badges : {{ badges|length }}</p>
+
+  {% if badges %}
+    <div class="badges-container">
+      {% for badge in badges %}
+        <div class="badge-card 
+          {% if 'verbes' in badge.titre %}badge-bleu
+          {% elif 'mots' in badge.titre %}badge-vert
+          {% elif 'additions' in badge.titre or 'math' in badge.titre %}badge-orange
+          {% else %}badge-gris{% endif %}">
+          <span class="emoji">🏅</span>
+          <div>
+            <strong>{{ badge.titre }}</strong><br>
+            <small>{{ badge.date_attribue|date:"d/m/Y" }}</small>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Pas encore de badges.</p>
+  {% endif %}
+</div>
+<!-- 🤖 Assistant IA -->
+<div class="card p-3 mb-4 bg-light border-info shadow-sm">
+  <h5 class="mb-2">🤖 Assistant Proko</h5>
+  <p>{{ message_assistant }}</p>
+</div>
+
+
+<!-- ✅ Barre de progression -->
+<div class="progress-container">
+  <h5 class="text-center">📊 Progression des mini-jeux</h5>
+  <div class="progress" style="height: 25px;">
+    <div class="progress-bar bg-success" role="progressbar"
+         style="width: {{ progression|floatformat:0 }}%;"
+         aria-valuenow="{{ progression }}" aria-valuemin="0" aria-valuemax="100">
+      {{ progression|floatformat:0 }}% complété
+    </div>
+  </div>
+</div>
+{% if progression|floatformat:0 == "100" %}
+  <div class="alert alert-success text-center" role="alert">
+    🎉 Félicitations ! Tu as terminé tous les mini-jeux. Continue comme ça champion(ne) ! 🏆
+  </div>
+{% endif %}
+
+
+<!-- 🎮 Sélection des jeux -->
+<div class="container mt-5">
+  <h2 class="text-center mb-5">🎮 Choisis ton mini-jeu éducatif</h2>
+  <div class="row justify-content-center">
+
+    <!-- Français -->
+    <div class="col-md-4 mb-4">
+      <div class="card game-card border-primary text-center">
+        <div class="card-body">
+          <div class="game-icon">📝</div>
+          <h5 class="card-title">
+            Trouve le mot
+            {% if jeux_finis.mot %} ✅{% endif %}
+          </h5>
+          <p class="card-text">Devine le mot à partir d’indices. Parfait pour réviser le vocabulaire !</p>
+          <a href="{% url 'mini_jeu' %}" class="btn btn-outline-primary">Jouer</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maths -->
+    <div class="col-md-4 mb-4">
+      <div class="card game-card border-success text-center">
+        <div class="card-body">
+          <div class="game-icon">➕</div>
+          <h5 class="card-title">
+            Additions éclairs
+            {% if jeux_finis.math %} ✅{% endif %}
+          </h5>
+          <p class="card-text">Résous des calculs vite et bien ! Chaque bonne réponse te rapporte un point.</p>
+          <a href="{% url 'mini_jeu_maths' %}" class="btn btn-outline-success">Jouer</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problème illustré -->
+    <div class="col-md-4 mb-4">
+      <div class="card game-card border-info text-center">
+        <div class="card-body">
+          <div class="game-icon">🎨</div>
+          <h5 class="card-title">
+            Problème illustré
+            {% if jeux_finis.probleme %} ✅{% endif %}
+          </h5>
+          <p class="card-text">Lis et résous un petit problème illustré. Une façon amusante de réfléchir !</p>
+          <a href="{% url 'jeu_probleme' %}?niveau=CE2" class="btn btn-outline-info">Jouer</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

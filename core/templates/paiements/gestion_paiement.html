@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">💳 Gestion des paiements</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm">
+                <h4>💸 Paiements des élèves</h4>
+                <p>Consultez ou ajoutez les paiements des élèves.</p>
+                <a href="{% url 'paiements_eleves' %}" class="btn btn-outline-primary">Accéder</a>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm">
+                <h4>💼 Paiements des enseignants</h4>
+                <p>Suivez le paiement des salaires des enseignants.</p>
+                <a href="{% url 'paiements_enseignants' %}" class="btn btn-outline-secondary">Accéder</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

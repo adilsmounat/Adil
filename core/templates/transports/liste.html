@@ -1,0 +1,17 @@
+<h2>Liste des transports</h2>
+<table>
+    <tr>
+        <th>Élève</th>
+        <th>Moyen</th>
+        <th>Chauffeur</th>
+        <th>Numéro Bus</th>
+    </tr>
+    {% for transport in transports %}
+    <tr>
+        <td>{{ transport.eleve.nom }}</td>
+        <td>{{ transport.moyen }}</td>
+        <td>{{ transport.chauffeur }}</td>
+        <td>{{ transport.numero_bus }}</td>
+    </tr>
+    {% endfor %}
+</table>

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Mes enfants</h2>
+  {% if enfants %}
+    <ul class="list-group">
+      {% for enfant in enfants %}
+        <li class="list-group-item">
+          {{ enfant.nom }} - Classe : {{ enfant.classe }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Vous n'avez pas d'enfants enregistrés.</p>
+  {% endif %}
+</div>
+{% endblock %}
